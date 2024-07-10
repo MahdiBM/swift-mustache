@@ -105,6 +105,20 @@ final class TransformTests: XCTestCase {
         """)
     }
 
+    func testMultipleTransformsWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{minusone(plusone(last(reversed(numbers))))}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["numbers": [5, 4, 3]]]
+        XCTAssertEqual(template.render(object), """
+        5
+
+        """)
+    }
+
     func testDoubleTransformWorks() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}
