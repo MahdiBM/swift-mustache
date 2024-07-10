@@ -48,7 +48,7 @@ public extension StringProtocol {
         case "uppercased":
             return uppercased()
         case "reversed":
-            return reversed()
+            return Substring(self.reversed())
         default:
             return nil
         }
@@ -92,6 +92,78 @@ extension Array: MustacheTransformable {
 }
 
 extension Array: ComparableSequence where Element: Comparable {
+    func comparableTransform(_ name: String) -> Any? {
+        switch name {
+        case "sorted":
+            return sorted()
+        default:
+            return nil
+        }
+    }
+}
+
+extension Set: MustacheTransformable {
+    /// Transform Array.
+    ///
+    /// Transforms available are `count` and for sets
+    /// with comparable elements `sorted`.
+    /// - Parameter name: transform name
+    /// - Returns: Result
+    public func transform(_ name: String) -> Any? {
+        switch name {
+        case "count":
+            return count
+        case "empty":
+            return isEmpty
+        default:
+            if let comparableSeq = self as? ComparableSequence {
+                return comparableSeq.comparableTransform(name)
+            }
+            return nil
+        }
+    }
+}
+
+extension Set: ComparableSequence where Element: Comparable {
+    func comparableTransform(_ name: String) -> Any? {
+        switch name {
+        case "sorted":
+            return sorted()
+        default:
+            return nil
+        }
+    }
+}
+
+extension ReversedCollection: MustacheTransformable {
+    /// Transform Array.
+    ///
+    /// Transforms available are `first`, `last`, `reversed`, `count` and for collections
+    /// with comparable elements `sorted`.
+    /// - Parameter name: transform name
+    /// - Returns: Result
+    public func transform(_ name: String) -> Any? {
+        switch name {
+        case "first":
+            return first
+        case "last":
+            return last
+        case "reversed":
+            return reversed()
+        case "count":
+            return count
+        case "empty":
+            return isEmpty
+        default:
+            if let comparableSeq = self as? ComparableSequence {
+                return comparableSeq.comparableTransform(name)
+            }
+            return nil
+        }
+    }
+}
+
+extension ReversedCollection: ComparableSequence where Element: Comparable {
     func comparableTransform(_ name: String) -> Any? {
         switch name {
         case "sorted":

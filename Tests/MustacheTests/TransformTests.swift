@@ -80,6 +80,79 @@ final class TransformTests: XCTestCase {
         """)
     }
 
+    func testDoubleSequenceTransformDoesNotWork() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{#reversed(numbers)}}{{count(.)}}{{/reversed(numbers)}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["numbers": [1, 2, 3]]]
+        XCTAssertEqual(template.render(object), "\n")
+    }
+
+    func testDoubleSequenceTransformWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{count(reversed(numbers))}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["numbers": [1, 2, 3]]]
+        XCTAssertEqual(template.render(object), """
+        3
+
+        """)
+    }
+
+    func testDoubleTransformWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{#uppercased(string)}}{{reversed(.)}}{{/uppercased(string)}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["string": "a123a"]]
+        XCTAssertEqual(template.render(object), """
+        A321A
+
+        """)
+    }
+
+    /*
+     "Rendering Token: section(name: \"repo\", transform: nil, template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.section(name: \"numbers\", transform: Optional(\"reversed\"), template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.variable(name: \".\", transform: Optional(\"count\"))])), Mustache.MustacheTemplate.Token.text(\"\\n\")]))"
+     "Might Transfrom Dictionary<String, Array<Int>> false"
+     "Rendering Value"
+     "Rendering Token: section(name: \"numbers\", transform: Optional(\"reversed\"), template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.variable(name: \".\", transform: Optional(\"count\"))]))"
+     "Might Transfrom Array<Int> true"
+     "Might Transfrom Array<Int> true"
+     "Rendering Array"
+     "Rendering Token: variable(name: \".\", transform: Optional(\"count\"))"
+     "Might Transfrom Int true"
+     "Might Transfrom Int true"
+     "Rendering Token: variable(name: \".\", transform: Optional(\"count\"))"
+     "Might Transfrom Int true"
+     "Might Transfrom Int true"
+     "Rendering Token: variable(name: \".\", transform: Optional(\"count\"))"
+     "Might Transfrom Int true"
+     "Might Transfrom Int true"
+     "Rendering Token: text(\"\\n\")"
+     */
+
+    /*
+     "Rendering Token: section(name: \"repo\", transform: nil, template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.section(name: \"string\", transform: Optional(\"uppercased\"), template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.variable(name: \".\", transform: Optional(\"reversed\"))])), Mustache.MustacheTemplate.Token.text(\"\\n\")]))"
+     "Might Transfrom Dictionary<String, String> false"
+     "Rendering Value"
+     "Rendering Token: section(name: \"string\", transform: Optional(\"uppercased\"), template: Mustache.MustacheTemplate(tokens: [Mustache.MustacheTemplate.Token.variable(name: \".\", transform: Optional(\"reversed\"))]))"
+     "Might Transfrom String true"
+     "Might Transfrom String true"
+     "Rendering Value"
+     "Rendering Token: variable(name: \".\", transform: Optional(\"reversed\"))"
+     "Might Transfrom String true"
+     "Might Transfrom String true"
+     "Rendering Token: text(\"\\n\")"
+     */
+
     func testEvenOdd() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}
